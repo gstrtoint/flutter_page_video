@@ -121,7 +121,7 @@ class _PlayViewState extends State<PlayView> {
       ]);
       Navigator.of(context)
           .push(PageRouteBuilder(
-        settings: RouteSettings(isInitialRoute: false),
+        settings: RouteSettings(),
         pageBuilder: (
             BuildContext context,
             Animation<double> animation,
