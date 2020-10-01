@@ -1,4 +1,8 @@
+///
+///Adaptei para implementar auto play durate rolagem da tela.
+///
 library flutter_page_video;
+
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter/services.dart';
@@ -7,17 +11,26 @@ import 'package:screen/screen.dart';
 class SimpleViewPlayer extends StatefulWidget {
   final String source;
   bool isFullScreen;
+  bool autoplay;
+  bool looping;
 
-  SimpleViewPlayer(this.source, {this.isFullScreen: false});
+  SimpleViewPlayer(this.source,
+      {this.isFullScreen: false, this.autoplay: false, this.looping: false});
+
+  SimpleViewPlayerState simpleViewPlayerState;
 
   @override
-  _SimpleViewPlayerState createState() => _SimpleViewPlayerState();
+  SimpleViewPlayerState createState() {
+    simpleViewPlayerState = SimpleViewPlayerState();
+    return simpleViewPlayerState;
+  }
 }
 
-class _SimpleViewPlayerState extends State<SimpleViewPlayer> {
+class SimpleViewPlayerState extends State<SimpleViewPlayer> {
   VideoPlayerController controller;
   VoidCallback listener;
   bool hideBottom = true;
+  bool playing = false;
 
   @override
   void initState() {
@@ -30,9 +43,11 @@ class _SimpleViewPlayerState extends State<SimpleViewPlayer> {
     };
     controller = VideoPlayerController.network(widget.source);
     controller.initialize();
-    controller.setLooping(true);
+    controller.setLooping(widget.looping);
     controller.addListener(listener);
-    controller.play();
+    if (widget.autoplay) {
+      controller.play();
+    }
     Screen.keepOn(true);
     if (widget.isFullScreen) {
       SystemChrome.setEnabledSystemUIOverlays([]);
@@ -123,10 +138,10 @@ class _PlayViewState extends State<PlayView> {
           .push(PageRouteBuilder(
         settings: RouteSettings(),
         pageBuilder: (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-            ) {
+          BuildContext context,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+        ) {
           return AnimatedBuilder(
             animation: animation,
             builder: (BuildContext context, Widget child) {
@@ -170,100 +185,100 @@ class _PlayViewState extends State<PlayView> {
               children: <Widget>[
                 Center(
                     child: AspectRatio(
-                      aspectRatio: size.width / size.height,
-                      child: VideoPlayer(controller),
-                    )),
+                  aspectRatio: size.width / size.height,
+                  child: VideoPlayer(controller),
+                )),
                 Align(
                     alignment: Alignment.bottomCenter,
                     child: hideBottom
                         ? Container()
                         : Opacity(
-                      opacity: 0.8,
-                      child: Container(
-                          height: 30.0,
-                          color: Colors.grey,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: <Widget>[
-                              GestureDetector(
-                                child: Container(
-                                  child: controller.value.isPlaying
-                                      ? Icon(
-                                    Icons.pause,
-                                    color: primaryColor,
-                                  )
-                                      : Icon(
-                                    Icons.play_arrow,
-                                    color: primaryColor,
-                                  ),
-                                ),
-                                onTap: onClickPlay,
-                              ),
-                              Container(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 5.0),
-                                  child: Center(
-                                    child: Text(
-                                      "${controller.value.position.toString().split(".")[0]}",
-                                      style:
-                                      TextStyle(color: Colors.white),
+                            opacity: 0.8,
+                            child: Container(
+                                height: 30.0,
+                                color: Colors.grey,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: <Widget>[
+                                    GestureDetector(
+                                      child: Container(
+                                        child: controller.value.isPlaying
+                                            ? Icon(
+                                                Icons.pause,
+                                                color: primaryColor,
+                                              )
+                                            : Icon(
+                                                Icons.play_arrow,
+                                                color: primaryColor,
+                                              ),
+                                      ),
+                                      onTap: onClickPlay,
                                     ),
-                                  )),
-                              Expanded(
-                                  child: VideoProgressIndicator(
-                                    controller,
-                                    allowScrubbing: true,
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 1.0, vertical: 1.0),
-                                    colors: VideoProgressColors(
-                                        playedColor: primaryColor),
-                                  )),
-                              Container(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 5.0),
-                                  child: Center(
-                                    child: Text(
-                                      "${controller.value.duration.toString().split(".")[0]}",
-                                      style:
-                                      TextStyle(color: Colors.white),
-                                    ),
-                                  )),
-                              Container(
-                                child: widget.allowFullScreen
-                                    ? Container(
-                                  child: MediaQuery.of(context)
-                                      .orientation ==
-                                      Orientation.portrait
-                                      ? GestureDetector(
-                                    child: Icon(
-                                      Icons.fullscreen,
-                                      color: primaryColor,
-                                    ),
-                                    onTap: onClickFullScreen,
-                                  )
-                                      : GestureDetector(
-                                    child: Icon(
-                                      Icons.fullscreen_exit,
-                                      color: primaryColor,
-                                    ),
-                                    onTap:
-                                    onClickExitFullScreen,
-                                  ),
-                                )
-                                    : Container(),
-                              )
-                            ],
+                                    Container(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 5.0),
+                                        child: Center(
+                                          child: Text(
+                                            "${controller.value.position.toString().split(".")[0]}",
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                        )),
+                                    Expanded(
+                                        child: VideoProgressIndicator(
+                                      controller,
+                                      allowScrubbing: true,
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 1.0, vertical: 1.0),
+                                      colors: VideoProgressColors(
+                                          playedColor: primaryColor),
+                                    )),
+                                    Container(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 5.0),
+                                        child: Center(
+                                          child: Text(
+                                            "${controller.value.duration.toString().split(".")[0]}",
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                        )),
+                                    Container(
+                                      child: widget.allowFullScreen
+                                          ? Container(
+                                              child: MediaQuery.of(context)
+                                                          .orientation ==
+                                                      Orientation.portrait
+                                                  ? GestureDetector(
+                                                      child: Icon(
+                                                        Icons.fullscreen,
+                                                        color: primaryColor,
+                                                      ),
+                                                      onTap: onClickFullScreen,
+                                                    )
+                                                  : GestureDetector(
+                                                      child: Icon(
+                                                        Icons.fullscreen_exit,
+                                                        color: primaryColor,
+                                                      ),
+                                                      onTap:
+                                                          onClickExitFullScreen,
+                                                    ),
+                                            )
+                                          : Container(),
+                                    )
+                                  ],
+                                )),
                           )),
-                    )),
                 Align(
                   alignment: Alignment.center,
                   child: controller.value.isPlaying
                       ? Container()
                       : Icon(
-                    Icons.play_circle_filled,
-                    color: primaryColor,
-                    size: 48.0,
-                  ),
+                          Icons.play_circle_filled,
+                          color: primaryColor,
+                          size: 48.0,
+                        ),
                 )
               ],
             )),
